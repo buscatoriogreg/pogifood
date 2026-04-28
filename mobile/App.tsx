@@ -48,20 +48,25 @@ function OrdersStack() {
   );
 }
 
+function TabIcon({ emoji, color }: { emoji: string; color: string }) {
+  return <Text style={{ fontSize: 26, color, lineHeight: 30 }}>{emoji}</Text>;
+}
+
 function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
         tabBarActiveTintColor: '#F97316',
         tabBarInactiveTintColor: '#9CA3AF',
-        tabBarStyle: { borderTopColor: '#F3F4F6', paddingBottom: 4, height: 60 },
+        tabBarStyle: { borderTopColor: '#F3F4F6', paddingBottom: 8, paddingTop: 6, height: 70 },
+        tabBarLabelStyle: { fontSize: 12, fontWeight: '600', marginTop: 2 },
         headerShown: false,
       }}
     >
-      <Tab.Screen name="Home" component={HomeStack} options={{ tabBarLabel: 'Home', tabBarIcon: ({ color }) => <Text style={{ fontSize: 22, color }}>🏠</Text> }} />
-      <Tab.Screen name="Cart" component={CartScreen} options={{ tabBarLabel: 'Cart', tabBarIcon: ({ color }) => <Text style={{ fontSize: 22, color }}>🛒</Text> }} />
-      <Tab.Screen name="Orders" component={OrdersStack} options={{ tabBarLabel: 'Orders', tabBarIcon: ({ color }) => <Text style={{ fontSize: 22, color }}>📋</Text> }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: 'Profile', tabBarIcon: ({ color }) => <Text style={{ fontSize: 22, color }}>👤</Text> }} />
+      <Tab.Screen name="Home" component={HomeStack} options={{ tabBarLabel: 'Home', tabBarIcon: ({ color }) => <TabIcon emoji="🏠" color={color} /> }} />
+      <Tab.Screen name="Cart" component={CartScreen} options={{ tabBarLabel: 'Cart', tabBarIcon: ({ color }) => <TabIcon emoji="🛒" color={color} /> }} />
+      <Tab.Screen name="Orders" component={OrdersStack} options={{ tabBarLabel: 'Orders', tabBarIcon: ({ color }) => <TabIcon emoji="📋" color={color} /> }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: 'Profile', tabBarIcon: ({ color }) => <TabIcon emoji="👤" color={color} /> }} />
     </Tab.Navigator>
   );
 }
