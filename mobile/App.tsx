@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, ActivityIndicator } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { SocketProvider } from './src/context/SocketContext';
@@ -58,7 +59,7 @@ function MainTabs() {
       screenOptions={{
         tabBarActiveTintColor: '#F97316',
         tabBarInactiveTintColor: '#9CA3AF',
-        tabBarStyle: { borderTopColor: '#F3F4F6', paddingBottom: 8, paddingTop: 6, height: 70 },
+        tabBarStyle: { borderTopColor: '#F3F4F6', paddingTop: 6 },
         tabBarLabelStyle: { fontSize: 12, fontWeight: '600', marginTop: 2 },
         headerShown: false,
       }}
@@ -95,12 +96,14 @@ function RootNavigator() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <SocketProvider>
-        <NavigationContainer>
-          <RootNavigator />
-        </NavigationContainer>
-      </SocketProvider>
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <SocketProvider>
+          <NavigationContainer>
+            <RootNavigator />
+          </NavigationContainer>
+        </SocketProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }
