@@ -1,9 +1,36 @@
 require('dotenv').config();
 const express = require('express');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
 const cors = require('cors');
 const path = require('path');
+const jwt = require('jsonwebtoken');
+const { setIO } = require('./socket');
 
 const app = express();
+const httpServer = createServer(app);
+
+const io = new Server(httpServer, {
+  cors: { origin: '*' },
+  path: '/socket.io'
+});
+setIO(io);
+
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) return next(new Error('No token'));
+  try {
+    socket.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    next(new Error('Invalid token'));
+  }
+});
+
+io.on('connection', (socket) => {
+  socket.join(`user:${socket.user.id}`);
+  socket.on('disconnect', () => {});
+});
 
 app.use(cors({ origin: '*' }));
 app.use(express.json());
@@ -25,4 +52,4 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3003;
-app.listen(PORT, () => console.log(`PogiFood API running on port ${PORT}`));
+httpServer.listen(PORT, () => console.log(`PogiFood API running on port ${PORT}`));

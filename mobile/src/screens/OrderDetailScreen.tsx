@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import api from '../services/api';
+import { useSocket } from '../context/SocketContext';
 
 const STATUS_STEPS = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered'];
 const STATUS_ICONS: Record<string, string> = {
@@ -15,10 +16,22 @@ export default function OrderDetailScreen({ route }: any) {
   const { id } = route.params;
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { socket } = useSocket();
 
   useEffect(() => {
     api.get(`/orders/my/${id}`).then(({ data }) => setOrder(data)).finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (!socket) return;
+    const handler = ({ orderId, status }: { orderId: number; status: string }) => {
+      if (orderId === id) {
+        setOrder((prev: any) => prev ? { ...prev, status } : prev);
+      }
+    };
+    socket.on('order:status_updated', handler);
+    return () => { socket.off('order:status_updated', handler); };
+  }, [socket, id]);
 
   if (loading) return <View style={styles.centered}><ActivityIndicator size="large" color="#F97316" /></View>;
   if (!order) return <View style={styles.centered}><Text>Order not found</Text></View>;
@@ -47,7 +60,7 @@ export default function OrderDetailScreen({ route }: any) {
                 )}
               </View>
               <View style={styles.stepInfo}>
-                <Text style={[styles.stepIcon]}>{STATUS_ICONS[step]}</Text>
+                <Text style={styles.stepIcon}>{STATUS_ICONS[step]}</Text>
                 <Text style={[styles.stepLabel, idx <= currentStep && styles.stepLabelActive]}>
                   {STATUS_LABELS[step]}
                 </Text>

@@ -1,4 +1,6 @@
 const db = require('../config/database');
+const { getIO } = require('../socket');
+const { sendPushNotification } = require('../utils/push');
 
 const buildImageUrl = (filename) =>
   filename ? `${process.env.BASE_URL}/api/uploads/${filename}` : null;
@@ -127,9 +129,21 @@ const getOwnerOrders = async (req, res) => {
   }
 };
 
+const STATUS_LABELS = {
+  pending: 'Order Placed',
+  confirmed: 'Order Confirmed',
+  preparing: 'Being Prepared',
+  out_for_delivery: 'Out for Delivery',
+  delivered: 'Delivered',
+  cancelled: 'Order Cancelled',
+};
+
 const updateOrderStatus = async (req, res) => {
   try {
-    const [restaurants] = await db.query('SELECT id FROM restaurants WHERE owner_id = ?', [req.user.id]);
+    const [restaurants] = await db.query(
+      'SELECT r.id, r.name FROM restaurants r WHERE r.owner_id = ?',
+      [req.user.id]
+    );
     if (!restaurants.length) return res.status(404).json({ message: 'No restaurant found' });
 
     const { status } = req.body;
@@ -141,6 +155,32 @@ const updateOrderStatus = async (req, res) => {
       [status, req.params.id, restaurants[0].id]
     );
     if (!result.affectedRows) return res.status(404).json({ message: 'Order not found' });
+
+    // Fetch the order owner's push token
+    const [orders] = await db.query(
+      'SELECT o.user_id, u.push_token FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?',
+      [req.params.id]
+    );
+    if (orders.length) {
+      const { user_id, push_token } = orders[0];
+      const restaurantName = restaurants[0].name;
+      const orderId = req.params.id;
+
+      // Real-time socket event (for when app is open)
+      getIO()?.to(`user:${user_id}`).emit('order:status_updated', {
+        orderId: Number(orderId),
+        status,
+        restaurantName,
+      });
+
+      // Push notification (for background/closed app)
+      await sendPushNotification(push_token, {
+        title: `${STATUS_LABELS[status] ?? status} 🍜`,
+        body: `Your order #${orderId} from ${restaurantName} is now: ${status.replace(/_/g, ' ')}`,
+        data: { orderId: Number(orderId), status },
+      });
+    }
+
     res.json({ message: 'Order status updated' });
   } catch (err) {
     res.status(500).json({ message: err.message });

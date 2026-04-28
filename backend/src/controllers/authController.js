@@ -98,4 +98,14 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { register, ownerRegister, login, getProfile, updateProfile };
+const savePushToken = async (req, res) => {
+  try {
+    const { push_token } = req.body;
+    await db.query('UPDATE users SET push_token = ? WHERE id = ?', [push_token || null, req.user.id]);
+    res.json({ message: 'Push token saved' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports = { register, ownerRegister, login, getProfile, updateProfile, savePushToken };

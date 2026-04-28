@@ -1,10 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, RefreshControl
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../services/api';
+import { useSocket } from '../context/SocketContext';
 
 interface Order {
   id: number;
@@ -33,6 +34,7 @@ export default function OrdersScreen({ navigation }: any) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const { socket } = useSocket();
 
   const loadOrders = async () => {
     try {
@@ -45,6 +47,15 @@ export default function OrdersScreen({ navigation }: any) {
   };
 
   useFocusEffect(useCallback(() => { loadOrders(); }, []));
+
+  useEffect(() => {
+    if (!socket) return;
+    const handler = ({ orderId, status }: { orderId: number; status: string }) => {
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+    };
+    socket.on('order:status_updated', handler);
+    return () => { socket.off('order:status_updated', handler); };
+  }, [socket]);
 
   const onRefresh = () => { setRefreshing(true); loadOrders(); };
 
