@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PogiFood — Download App</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #fff7ed;
+      min-height: 100vh;
+      color: #111827;
+    }
+
+    /* ── Header ── */
+    .hero {
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      color: #fff;
+      text-align: center;
+      padding: 60px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0; right: 0;
+      height: 48px;
+      background: #fff7ed;
+      clip-path: ellipse(55% 100% at 50% 100%);
+    }
+    .hero-emoji { font-size: 80px; display: block; margin-bottom: 16px; filter: drop-shadow(0 4px 12px rgba(0,0,0,.2)); }
+    .hero h1   { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -.5px; }
+    .hero p    { font-size: 1.1rem; opacity: .9; margin-top: 8px; }
+
+    /* ── Card ── */
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.08);
+      padding: 32px;
+      max-width: 480px;
+      margin: -32px auto 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Download button ── */
+    .dl-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: #f97316;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 14px;
+      padding: 18px 28px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      transition: background .15s, transform .1s, box-shadow .15s;
+      box-shadow: 0 4px 16px rgba(249,115,22,.35);
+      margin-bottom: 16px;
+    }
+    .dl-btn:hover  { background: #ea580c; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(249,115,22,.4); }
+    .dl-btn:active { transform: translateY(0); }
+    .dl-btn svg    { flex-shrink: 0; }
+
+    .file-meta {
+      text-align: center;
+      font-size: .82rem;
+      color: #9ca3af;
+      margin-bottom: 28px;
+    }
+    .badge {
+      display: inline-block;
+      background: #f3f4f6;
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: .78rem;
+      font-weight: 600;
+      color: #6b7280;
+      margin: 0 3px;
+    }
+    .badge.green { background: #dcfce7; color: #166534; }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0;
+      color: #d1d5db;
+      font-size: .8rem;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: #e5e7eb;
+    }
+
+    /* ── QR ── */
+    .qr-section { text-align: center; }
+    .qr-section p { font-size: .9rem; color: #6b7280; margin-bottom: 16px; }
+    #qrcode {
+      display: inline-block;
+      padding: 12px;
+      background: #fff;
+      border: 2px solid #f3f4f6;
+      border-radius: 12px;
+    }
+    #qrcode img, #qrcode canvas { border-radius: 6px; }
+
+    /* ── Steps ── */
+    .steps-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #374151;
+      margin: 28px 0 14px;
+    }
+    .steps { list-style: none; }
+    .steps li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: .92rem;
+      color: #374151;
+      line-height: 1.5;
+    }
+    .steps li:last-child { border-bottom: none; }
+    .step-num {
+      flex-shrink: 0;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: #fff7ed;
+      color: #f97316;
+      font-weight: 700;
+      font-size: .8rem;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 1px;
+    }
+
+    /* ── Warning ── */
+    .warning {
+      background: #fef9c3;
+      border: 1px solid #fde047;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: .84rem;
+      color: #713f12;
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      line-height: 1.5;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 32px 16px 40px;
+      font-size: .8rem;
+      color: #9ca3af;
+    }
+    footer strong { color: #f97316; }
+
+    @media (max-width: 520px) {
+      .card { margin: -24px 12px 0; padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="hero-emoji">🍜</span>
+  <h1>PogiFood</h1>
+  <p>Order food from your favorite restaurants</p>
+</div>
+
+<div class="card">
+
+  <!-- Download button -->
+  <a class="dl-btn" href="/downloads/pogifood.apk" download="PogiFood.apk" id="dl-btn">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    Download APK
+  </a>
+
+  <div class="file-meta" id="meta">
+    <span class="badge green" id="version-badge">v1.0.0</span>
+    <span class="badge" id="build-badge">Loading…</span>
+    <span class="badge" id="date-badge"></span>
+  </div>
+
+  <!-- QR code -->
+  <div class="divider">or scan to download on your phone</div>
+  <div class="qr-section">
+    <p>Point your Android camera at the QR code</p>
+    <div id="qrcode"></div>
+  </div>
+
+  <!-- Install steps -->
+  <p class="steps-title">How to install</p>
+  <ol class="steps">
+    <li>
+      <span class="step-num">1</span>
+      <span>Tap <strong>Download APK</strong> above and wait for the file to download.</span>
+    </li>
+    <li>
+      <span class="step-num">2</span>
+      <span>Open your <strong>Downloads</strong> folder and tap <em>PogiFood.apk</em>.</span>
+    </li>
+    <li>
+      <span class="step-num">3</span>
+      <span>If prompted, tap <strong>Install anyway</strong> or enable <strong>Install unknown apps</strong> for your browser in Settings.</span>
+    </li>
+    <li>
+      <span class="step-num">4</span>
+      <span>Tap <strong>Install</strong> and wait a few seconds. Done! 🎉</span>
+    </li>
+  </ol>
+
+  <div class="warning">
+    <span style="font-size:1.1rem">⚠️</span>
+    <span>Android may show a warning because this app is not from the Play Store. This is normal for APK installs — just tap <strong>Install anyway</strong> to continue.</span>
+  </div>
+
+</div>
+
+<footer>
+  <p>MIT107 Project &nbsp;·&nbsp; <strong>PogiFood</strong></p>
+  <p style="margin-top:4px">Built with React Native &amp; Expo</p>
+</footer>
+
+<script>
+  // Generate QR code pointing to the APK download
+  const apkUrl = window.location.origin + '/downloads/pogifood.apk';
+  new QRCode(document.getElementById('qrcode'), {
+    text: apkUrl,
+    width: 180,
+    height: 180,
+    colorDark: '#111827',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
+  // Load build info
+  fetch('/downloads/build-info.json?t=' + Date.now())
+    .then(r => r.json())
+    .then(info => {
+      document.getElementById('version-badge').textContent = 'v' + info.version;
+      document.getElementById('build-badge').textContent   = 'Build #' + info.build;
+      document.getElementById('date-badge').textContent    = info.date;
+    })
+    .catch(() => {
+      document.getElementById('build-badge').textContent = 'Latest';
+    });
+</script>
+
+</body>
+</html>
