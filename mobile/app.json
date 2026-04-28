@@ -32,8 +32,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
+        "projectId": "d20ed2d5-e529-49a3-b0a1-f777205aed7d"
       }
-    }
+    },
+    "owner": "riogregbuscato"
   }
 }
