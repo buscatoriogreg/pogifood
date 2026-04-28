@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  Image, ActivityIndicator, Alert, ScrollView
+  Image, ActivityIndicator, ScrollView
 } from 'react-native';
 import api from '../services/api';
+import { useToast } from '../context/ToastContext';
 
 interface FoodItem {
   id: number;
@@ -30,6 +31,7 @@ export default function RestaurantScreen({ route, navigation }: any) {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
   const [addingId, setAddingId] = useState<number | null>(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
     api.get(`/restaurants/${id}`).then(({ data }) => setRestaurant(data)).finally(() => setLoading(false));
@@ -39,9 +41,9 @@ export default function RestaurantScreen({ route, navigation }: any) {
     setAddingId(item.id);
     try {
       await api.post('/cart', { food_item_id: item.id, quantity: 1 });
-      Alert.alert('Added!', `${item.name} added to cart`);
+      showToast({ type: 'cart', title: 'Added to Cart!', message: item.name });
     } catch (err: any) {
-      Alert.alert('Error', err.response?.data?.message || 'Could not add to cart');
+      showToast({ type: 'error', title: 'Could not add to cart', message: err.response?.data?.message });
     } finally {
       setAddingId(null);
     }

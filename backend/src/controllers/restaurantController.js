@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const { processImage } = require('../utils/processImage');
 
 const buildImageUrl = (req, filename) =>
   filename ? `${process.env.BASE_URL}/api/uploads/${filename}` : null;
@@ -61,7 +62,7 @@ const update = async (req, res) => {
     if (!rows.length) return res.status(404).json({ message: 'Restaurant not found' });
 
     let image = rows[0].image;
-    if (req.file) image = req.file.filename;
+    if (req.file) image = await processImage(req.file.filename);
 
     await db.query(
       'UPDATE restaurants SET name = ?, description = ?, address = ?, is_open = ?, image = ? WHERE owner_id = ?',

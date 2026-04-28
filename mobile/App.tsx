@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { SocketProvider } from './src/context/SocketContext';
+import { ToastProvider } from './src/context/ToastContext';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import HomeScreen from './src/screens/HomeScreen';
@@ -59,7 +60,7 @@ function MainTabs() {
       screenOptions={{
         tabBarActiveTintColor: '#F97316',
         tabBarInactiveTintColor: '#9CA3AF',
-        tabBarStyle: { borderTopColor: '#F3F4F6', paddingTop: 6 },
+        tabBarStyle: { borderTopColor: '#F3F4F6', paddingTop: 8, paddingBottom: 8 },
         tabBarLabelStyle: { fontSize: 12, fontWeight: '600', marginTop: 2 },
         headerShown: false,
       }}
@@ -99,9 +100,11 @@ export default function App() {
     <SafeAreaProvider>
       <AuthProvider>
         <SocketProvider>
-          <NavigationContainer>
-            <RootNavigator />
-          </NavigationContainer>
+          <ToastProvider>
+            <NavigationContainer>
+              <RootNavigator />
+            </NavigationContainer>
+          </ToastProvider>
         </SocketProvider>
       </AuthProvider>
     </SafeAreaProvider>

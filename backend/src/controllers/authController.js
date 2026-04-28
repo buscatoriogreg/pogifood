@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
+const { processImage } = require('../utils/processImage');
 
 const generateToken = (user) =>
   jwt.sign({ id: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -40,7 +41,7 @@ const ownerRegister = async (req, res) => {
       const ownerId = userResult.insertId;
 
       let imagePath = null;
-      if (req.file) imagePath = req.file.filename;
+      if (req.file) imagePath = await processImage(req.file.filename);
 
       await conn.query(
         'INSERT INTO restaurants (owner_id, name, description, address, image) VALUES (?, ?, ?, ?, ?)',

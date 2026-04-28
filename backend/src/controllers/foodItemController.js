@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const { processImage } = require('../utils/processImage');
 
 const buildImageUrl = (filename) =>
   filename ? `${process.env.BASE_URL}/api/uploads/${filename}` : null;
@@ -48,7 +49,7 @@ const create = async (req, res) => {
     const restaurantId = restaurants[0].id;
 
     const { name, description, price, category_id, is_available } = req.body;
-    const image = req.file ? req.file.filename : null;
+    const image = req.file ? await processImage(req.file.filename) : null;
 
     const [result] = await db.query(
       'INSERT INTO food_items (restaurant_id, category_id, name, description, price, image, is_available) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -70,7 +71,7 @@ const update = async (req, res) => {
 
     const { name, description, price, category_id, is_available } = req.body;
     let image = items[0].image;
-    if (req.file) image = req.file.filename;
+    if (req.file) image = await processImage(req.file.filename);
 
     await db.query(
       'UPDATE food_items SET name = ?, description = ?, price = ?, category_id = ?, image = ?, is_available = ? WHERE id = ?',

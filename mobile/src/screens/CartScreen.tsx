@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  Image, ActivityIndicator, Alert, TextInput, ScrollView
+  Image, ActivityIndicator, TextInput, ScrollView
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 interface CartItem {
   id: number;
@@ -25,6 +26,7 @@ export default function CartScreen({ navigation }: any) {
   const [address, setAddress] = useState(user?.address || '');
   const [notes, setNotes] = useState('');
   const [placing, setPlacing] = useState(false);
+  const { showToast } = useToast();
 
   const loadCart = async () => {
     try {
@@ -47,22 +49,21 @@ export default function CartScreen({ navigation }: any) {
         setCart(c => c.map(i => i.id === item.id ? { ...i, quantity: qty } : i));
       }
     } catch (err: any) {
-      Alert.alert('Error', err.response?.data?.message || 'Error updating cart');
+      showToast({ type: 'error', title: 'Error updating cart', message: err.response?.data?.message });
     }
   };
 
   const placeOrder = async () => {
-    if (!address.trim()) return Alert.alert('Error', 'Please enter your delivery address');
-    if (cart.length === 0) return Alert.alert('Error', 'Your cart is empty');
+    if (!address.trim()) return showToast({ type: 'error', title: 'Enter your delivery address' });
+    if (cart.length === 0) return showToast({ type: 'error', title: 'Your cart is empty' });
     setPlacing(true);
     try {
       const { data } = await api.post('/orders', { delivery_address: address, notes });
-      Alert.alert('Order Placed! 🎉', `Order #${data.id} placed successfully!\nTotal: ₱${Number(data.total_amount).toFixed(2)}`, [
-        { text: 'View Orders', onPress: () => navigation.navigate('Orders') }
-      ]);
+      showToast({ type: 'order', title: 'Order Placed!', message: `Order #${data.id} · ₱${Number(data.total_amount).toFixed(2)}` });
       setCart([]);
+      setTimeout(() => navigation.navigate('Orders'), 1200);
     } catch (err: any) {
-      Alert.alert('Error', err.response?.data?.message || 'Could not place order');
+      showToast({ type: 'error', title: 'Could not place order', message: err.response?.data?.message });
     } finally {
       setPlacing(false);
     }
