@@ -1,0 +1,58 @@
+name: Submit to Play Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      track:
+        description: 'Play Store release track'
+        required: true
+        default: 'internal'
+        type: choice
+        options:
+          - internal
+          - alpha
+          - beta
+          - production
+
+jobs:
+  submit:
+    name: Submit to Play Store (${{ github.event.inputs.track }})
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write Google Service Account key
+        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}' > google-service-account.json
+
+      - name: Submit latest build to Play Store
+        run: |
+          eas submit \
+            --platform android \
+            --profile production \
+            --non-interactive \
+            --android-track ${{ github.event.inputs.track }}
+
+      - name: Clean up service account key
+        if: always()
+        run: rm -f google-service-account.json

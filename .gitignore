@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Backend
+backend/.env
+backend/uploads/
+
+# Web build output
+web/dist/
+
+# Mobile
+mobile/.expo/
+mobile/dist/
+mobile/google-service-account.json
+mobile/*.jks
+mobile/*.keystore
+mobile/*.p8
+mobile/*.p12
+mobile/*.mobileprovision
+
+# General
+.DS_Store
+*.log
+npm-debug.*
+yarn-debug.*
